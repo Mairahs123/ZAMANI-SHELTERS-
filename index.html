@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zamani Shelters</title>
-    <!-- Load the Official Pi Network SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root {
@@ -38,7 +37,7 @@
             background: #333; color: var(--pi-purple); padding: 5px 12px;
             border-radius: 20px; font-size: 14px; display: inline-block; margin-bottom: 25px; font-weight: bold;
         }
-        .status-box { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; }
+        .status-box { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; min-height: 40px;}
         .btn {
             background: linear-gradient(135deg, #6200ee, #3700b3); color: white; border: none;
             padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: transform 0.2s, opacity 0.2s; width: 100%; margin-top: 10px;
@@ -62,7 +61,6 @@
 
         <button id="auth-btn" class="btn hidden">Authenticate with Pi Network</button>
 
-        <!-- Main App Features View -->
         <div id="main-app" class="app-features hidden">
             <h3>Explore Properties & Services</h3>
             <div class="feature-item">🏢 <strong>Virtual Real Estate</strong> - Browse available properties.</div>
@@ -70,7 +68,6 @@
             <div class="feature-item">💼 <strong>Secure Transactions</strong> - Transact safely via Pi Wallet.</div>
             
             <br>
-            <!-- New active test button to pass Step 10 -->
             <button id="pay-btn" class="btn" style="background: linear-gradient(135deg, #e2a126, #b77f15);">
                 🚀 Run Step 10 Test Payment (1 Pi)
             </button>
@@ -83,7 +80,7 @@
         const mainApp = document.getElementById('main-app');
         const payBtn = document.getElementById('pay-btn');
 
-        // 1. Initialize Pi SDK (Set sandbox: true for checklist verification testing)
+        // Initialize Pi SDK (sandbox: true matches your developer portal checklist mode)
         try {
             Pi.init({ version: "2.0", sandbox: true });
             statusText.innerText = "SDK initialized. Tap authenticate below.";
@@ -92,7 +89,7 @@
             statusText.innerText = "Please open this app inside the Pi Browser.";
         }
 
-        // 2. Authentication
+        // Authentication Hook
         authBtn.addEventListener('click', async () => {
             statusText.innerText = "Connecting...";
             authBtn.disabled = true;
@@ -108,7 +105,7 @@
             }
         });
 
-        // 3. Step 10 Payment Trigger
+        // Trigger Connected Step 10 Payment Flow
         payBtn.addEventListener('click', async () => {
             statusText.innerText = "Preparing transaction...";
             payBtn.disabled = true;
@@ -121,16 +118,33 @@
                 };
 
                 const callbacks = {
-                    onReadyForServerApproval: (paymentId) => {
-                        statusText.innerText = "Payment created! Since this is a simple checklist test without a backend server, wait a few seconds...";
-                        console.log("Payment ID ready for approval:", paymentId);
+                    onReadyForServerApproval: async (paymentId) => {
+                        statusText.innerText = "Sending payment to backend for automatic approval...";
+                        try {
+                            // This fetch connects straight to your new Vercel serverless function folder!
+                            const response = await fetch('/api/approve-payment', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ paymentId })
+                            });
+                            
+                            if(response.ok) {
+                                statusText.innerText = "Backend approved! Please continue on your wallet pop-up.";
+                            } else {
+                                statusText.innerText = "Backend approval failed. Check your Vercel logs.";
+                                payBtn.disabled = false;
+                            }
+                        } catch(err) {
+                            statusText.innerText = "Network connection error to backend.";
+                            payBtn.disabled = false;
+                        }
                     },
                     onReadyForServerCompletion: (paymentId, txid) => {
-                        statusText.innerText = "Payment submitted successfully to the block network!";
+                        statusText.innerText = "Payment completed and recorded on the blockchain network!";
                         console.log("Transaction ID:", txid);
                     },
                     onCancel: (paymentId) => {
-                        statusText.innerText = "Transaction cancelled by user.";
+                        statusText.innerText = "Transaction cancelled.";
                         payBtn.disabled = false;
                     },
                     onError: (error, payment) => {
@@ -139,7 +153,6 @@
                     }
                 };
 
-                // Request the payment modal from the Pi Browser
                 await Pi.createPayment(paymentData, callbacks);
 
             } catch (err) {
@@ -149,7 +162,7 @@
         });
 
         function onIncompletePaymentFound(payment) {
-            console.log("Incomplete payment found:", payment);
+            console.log("Incomplete payment tracked:", payment);
         }
     </script>
 </body>
