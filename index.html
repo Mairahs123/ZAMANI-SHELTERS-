@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zamani Shelters</title>
+    <!-- Load the Official Pi Network SDK -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        :root {
+            --pi-purple: #e2a126; /* Custom gold accent to complement Pi network */
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            box-sizing: border-box;
+        }
+        h1 {
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+        .domain-tag {
+            background: #333;
+            color: var(--pi-purple);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .status-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #6200ee, #3700b3);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        .btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .hidden {
+            display: none;
+        }
+        .app-features {
+            margin-top: 25px;
+            text-align: left;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .feature-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Zamani Shelters</h1>
+        <div class="domain-tag">zamanishelters.pi</div>
+        
+        <div class="status-box">
+            <p id="status-text">Loading Pi Network SDK...</p>
+        </div>
+
+        <button id="auth-btn" class="btn hidden">Authenticate with Pi Network</button>
+
+        <!-- Placeholder UI for features once authenticated -->
+        <div id="main-app" class="app-features hidden">
+            <h3>Explore Properties & Services</h3>
+            <div class="feature-item">🏢 <strong>Virtual Real Estate</strong> - Browse available properties.</div>
+            <div class="feature-item">🛠️ <strong>Vendor Dashboard</strong> - List your assets or services.</div>
+            <div class="feature-item">💼 <strong>Secure Transactions</strong> - Transact safely via Pi Wallet.</div>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const statusText = document.getElementById('status-text');
+        const authBtn = document.getElementById('auth-btn');
+        const mainApp = document.getElementById('main-app');
+
+        // 1. Initialize the Pi SDK
+        // NOTE: Set sandbox: true for testing in Sandbox/Testnet. Change to false when launching on Mainnet production.
+        try {
+            Pi.init({ version: "2.0", sandbox: true });
+            statusText.innerText = "SDK initialized successfully. Click below to verify your Pioneer account.";
+            authBtn.classList.remove('hidden');
+        } catch (e) {
+            statusText.innerText = "Failed to load Pi SDK. Make sure you are opening this inside the Pi Browser.";
+            console.error(e);
+        }
+
+        // 2. Authentication Flow
+        authBtn.addEventListener('click', async () => {
+            statusText.innerText = "Connecting to Pi Network...";
+            authBtn.disabled = true;
+
+            try {
+                const scopes = ['username', 'payments'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                
+                // Success
+                statusText.innerHTML = `👋 Welcome back, <strong>${auth.user.username}</strong>!<br>Your account is authenticated successfully.`;
+                authBtn.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                
+                console.log("Authentication details:", auth);
+            } catch (error) {
+                // Error handling
+                statusText.innerText = "Authentication failed or rejected. Please try again.";
+                authBtn.disabled = false;
+                console.error("Auth error:", error);
+            }
+        });
+
+        // 3. Incomplete Payment Callback (Required by SDK)
+        function onIncompletePaymentFound(payment) {
+            console.log("Incomplete payment hook detected:", payment);
+            // This triggers if a user's payment was interrupted previously.
+            // When building backend payments, you will send this to your server to resolve/cancel.
+        }
+    </script>
+</body>
+  </html>
