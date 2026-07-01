@@ -8,7 +8,7 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <style>
         :root {
-            --pi-purple: #e2a126; /* Custom gold accent to complement Pi network */
+            --pi-purple: #e2a126;
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-color: #ffffff;
@@ -33,62 +33,21 @@
             text-align: center;
             box-sizing: border-box;
         }
-        h1 {
-            margin-bottom: 5px;
-            color: #ffffff;
-        }
+        h1 { margin-bottom: 5px; color: #ffffff; }
         .domain-tag {
-            background: #333;
-            color: var(--pi-purple);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            display: inline-block;
-            margin-bottom: 25px;
-            font-weight: bold;
+            background: #333; color: var(--pi-purple); padding: 5px 12px;
+            border-radius: 20px; font-size: 14px; display: inline-block; margin-bottom: 25px; font-weight: bold;
         }
-        .status-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 15px;
-        }
+        .status-box { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; }
         .btn {
-            background: linear-gradient(135deg, #6200ee, #3700b3);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-            width: 100%;
+            background: linear-gradient(135deg, #6200ee, #3700b3); color: white; border: none;
+            padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: transform 0.2s, opacity 0.2s; width: 100%; margin-top: 10px;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-        .btn:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .hidden {
-            display: none;
-        }
-        .app-features {
-            margin-top: 25px;
-            text-align: left;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-        }
-        .feature-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #222;
-        }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn:disabled { background: #444; color: #888; cursor: not-allowed; transform: none; }
+        .hidden { display: none; }
+        .app-features { margin-top: 25px; text-align: left; border-top: 1px solid #333; padding-top: 20px; }
+        .feature-item { padding: 10px 0; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
@@ -103,61 +62,95 @@
 
         <button id="auth-btn" class="btn hidden">Authenticate with Pi Network</button>
 
-        <!-- Placeholder UI for features once authenticated -->
+        <!-- Main App Features View -->
         <div id="main-app" class="app-features hidden">
             <h3>Explore Properties & Services</h3>
             <div class="feature-item">🏢 <strong>Virtual Real Estate</strong> - Browse available properties.</div>
             <div class="feature-item">🛠️ <strong>Vendor Dashboard</strong> - List your assets or services.</div>
             <div class="feature-item">💼 <strong>Secure Transactions</strong> - Transact safely via Pi Wallet.</div>
+            
+            <br>
+            <!-- New active test button to pass Step 10 -->
+            <button id="pay-btn" class="btn" style="background: linear-gradient(135deg, #e2a126, #b77f15);">
+                🚀 Run Step 10 Test Payment (1 Pi)
+            </button>
         </div>
     </div>
 
     <script>
-        // Elements
         const statusText = document.getElementById('status-text');
         const authBtn = document.getElementById('auth-btn');
         const mainApp = document.getElementById('main-app');
+        const payBtn = document.getElementById('pay-btn');
 
-        // 1. Initialize the Pi SDK
-        // NOTE: Set sandbox: true for testing in Sandbox/Testnet. Change to false when launching on Mainnet production.
+        // 1. Initialize Pi SDK (Set sandbox: true for checklist verification testing)
         try {
             Pi.init({ version: "2.0", sandbox: true });
-            statusText.innerText = "SDK initialized successfully. Click below to verify your Pioneer account.";
+            statusText.innerText = "SDK initialized. Tap authenticate below.";
             authBtn.classList.remove('hidden');
         } catch (e) {
-            statusText.innerText = "Failed to load Pi SDK. Make sure you are opening this inside the Pi Browser.";
-            console.error(e);
+            statusText.innerText = "Please open this app inside the Pi Browser.";
         }
 
-        // 2. Authentication Flow
+        // 2. Authentication
         authBtn.addEventListener('click', async () => {
-            statusText.innerText = "Connecting to Pi Network...";
+            statusText.innerText = "Connecting...";
             authBtn.disabled = true;
-
             try {
                 const scopes = ['username', 'payments'];
                 const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
-                // Success
-                statusText.innerHTML = `👋 Welcome back, <strong>${auth.user.username}</strong>!<br>Your account is authenticated successfully.`;
+                statusText.innerHTML = `👋 Welcome back, <strong>${auth.user.username}</strong>!`;
                 authBtn.classList.add('hidden');
                 mainApp.classList.remove('hidden');
-                
-                console.log("Authentication details:", auth);
             } catch (error) {
-                // Error handling
-                statusText.innerText = "Authentication failed or rejected. Please try again.";
+                statusText.innerText = "Authentication failed.";
                 authBtn.disabled = false;
-                console.error("Auth error:", error);
             }
         });
 
-        // 3. Incomplete Payment Callback (Required by SDK)
+        // 3. Step 10 Payment Trigger
+        payBtn.addEventListener('click', async () => {
+            statusText.innerText = "Preparing transaction...";
+            payBtn.disabled = true;
+
+            try {
+                const paymentData = {
+                    amount: 1,
+                    memo: "Testing step 10 domain deployment for Zamani Shelters",
+                    metadata: { type: "test_claim" }
+                };
+
+                const callbacks = {
+                    onReadyForServerApproval: (paymentId) => {
+                        statusText.innerText = "Payment created! Since this is a simple checklist test without a backend server, wait a few seconds...";
+                        console.log("Payment ID ready for approval:", paymentId);
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        statusText.innerText = "Payment submitted successfully to the block network!";
+                        console.log("Transaction ID:", txid);
+                    },
+                    onCancel: (paymentId) => {
+                        statusText.innerText = "Transaction cancelled by user.";
+                        payBtn.disabled = false;
+                    },
+                    onError: (error, payment) => {
+                        statusText.innerText = "Transaction error encountered.";
+                        payBtn.disabled = false;
+                    }
+                };
+
+                // Request the payment modal from the Pi Browser
+                await Pi.createPayment(paymentData, callbacks);
+
+            } catch (err) {
+                statusText.innerText = "Payment initialization failed.";
+                payBtn.disabled = false;
+            }
+        });
+
         function onIncompletePaymentFound(payment) {
-            console.log("Incomplete payment hook detected:", payment);
-            // This triggers if a user's payment was interrupted previously.
-            // When building backend payments, you will send this to your server to resolve/cancel.
+            console.log("Incomplete payment found:", payment);
         }
     </script>
 </body>
-  </html>
+</html>
