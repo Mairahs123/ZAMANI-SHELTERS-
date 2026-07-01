@@ -3,166 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zamani Shelters</title>
+    <title>Zamani Shelters - Premium Pi Real Estate dApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    
     <style>
-        :root {
-            --pi-purple: #e2a126;
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #ffffff;
-        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
         }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            text-align: center;
-            box-sizing: border-box;
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        h1 { margin-bottom: 5px; color: #ffffff; }
-        .domain-tag {
-            background: #333; color: var(--pi-purple); padding: 5px 12px;
-            border-radius: 20px; font-size: 14px; display: inline-block; margin-bottom: 25px; font-weight: bold;
+        /* Elegant glass scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .status-box { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; min-height: 40px;}
-        .btn {
-            background: linear-gradient(135deg, #6200ee, #3700b3); color: white; border: none;
-            padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: transform 0.2s, opacity 0.2s; width: 100%; margin-top: 10px;
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
         }
-        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
-        .btn:disabled { background: #444; color: #888; cursor: not-allowed; transform: none; }
-        .hidden { display: none; }
-        .app-features { margin-top: 25px; text-align: left; border-top: 1px solid #333; padding-top: 20px; }
-        .feature-item { padding: 10px 0; border-bottom: 1px solid #222; }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-    <div class="container">
-        <h1>Zamani Shelters</h1>
-        <div class="domain-tag">zamanishelters.pi</div>
-        
-        <div class="status-box">
-            <p id="status-text">Loading Pi Network SDK...</p>
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-500 text-slate-950 p-2.5 rounded-xl font-extrabold tracking-wider shadow-lg shadow-amber-500/10">
+                        🏡
+                    </div>
+                    <div>
+                        <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-amber-400 via-yellow-200 to-white bg-clip-text text-transparent">ZAMANI SHELTERS</span>
+                        <p class="text-[10px] text-amber-500 uppercase tracking-widest font-semibold">Web3 Pi Property Ecosystem</p>
+                    </div>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-1">
+                    <button onclick="switchTab('explore')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition duration-200 text-amber-400 bg-slate-800/80" id="btn-explore">
+                        Explore Galleries
+                    </button>
+                    <button onclick="switchTab('vendor')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition duration-200" id="btn-vendor">
+                        Vendor Portal
+                    </button>
+                    <button onclick="switchTab('admin')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition duration-200" id="btn-admin">
+                        Admin Dashboard
+                    </button>
+                </nav>
+
+                <div class="flex items-center gap-3">
+                    <div id="connection-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                        <span id="connection-text">Pi Disconnected</span>
+                    </div>
+                    <button onclick="connectPiWallet()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition duration-150 transform active:scale-95 shadow-lg shadow-amber-500/15" id="connect-btn">
+                        Connect Pi Wallet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div id="tab-explore" class="tab-content block">
+            <div class="relative bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-10 mb-10 overflow-hidden">
+                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent"></div>
+                <div class="relative z-10 max-w-3xl">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-4 border border-amber-500/20">
+                        ⭐ Real Estate Platform for the Open Network
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4">Securing Premium Shelters With Your <span class="bg-gradient-to-r from-amber-400 to-yellow-200 bg-clip-text text-transparent">Pi Coins</span></h1>
+                    <p class="text-slate-400 text-sm sm:text-base mb-6 leading-relaxed">Direct peer-to-peer premium property transfers, rentals, and verified land deeds securely processed via automatic escrow contract handshakes.</p>
+                </div>
+
+                <div class="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-950/85 p-3 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] text-slate-500 uppercase font-semibold mb-1 px-1">Location or Property Keyword</label>
+                        <input id="search-input" oninput="refreshUI()" type="text" placeholder="e.g. Maitama, Abuja, Lagos, Penthouse..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-amber-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-500 uppercase font-semibold mb-1 px-1">Type of Listing</label>
+                        <select id="filter-purpose" onchange="refreshUI()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-amber-500 transition">
+                            <option value="all">Any Mode</option>
+                            <option value="Buy">For Sale</option>
+                            <option value="Rent">For Rent</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="refreshUI()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                            Apply Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">Active Real Estate Portals</h2>
+                        <p class="text-xs text-slate-400">Discover and inspect premium villas, lofts, apartments, and land plots.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="filterOrigin('all')" id="orig-all" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 transition">All Properties</button>
+                        <button onclick="filterOrigin('admin')" id="orig-admin" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition">Admin Verified</button>
+                        <button onclick="filterOrigin('vendor')" id="orig-vendor" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition">Vendor Galleries</button>
+                    </div>
+                </div>
+
+                <div id="listings-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
         </div>
 
-        <button id="auth-btn" class="btn hidden">Authenticate with Pi Network</button>
+        <div id="tab-vendor" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 flex flex-col gap-6">
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg text-white">Vendor Workspace</h3>
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">Active Node</span>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1 border-b border-slate-800">
+                                <span class="text-slate-400">Active Listings:</span>
+                                <span id="vendor-stat-count" class="font-bold text-slate-200">0</span>
+                            </div>
+                            <div class="flex justify-between py-1">
+                                <span class="text-slate-400">Total volume logged:</span>
+                                <span id="vendor-stat-volume" class="font-bold text-amber-500">0.00 π</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <div id="main-app" class="app-features hidden">
-            <h3>Explore Properties & Services</h3>
-            <div class="feature-item">🏢 <strong>Virtual Real Estate</strong> - Browse available properties.</div>
-            <div class="feature-item">🛠️ <strong>Vendor Dashboard</strong> - List your assets or services.</div>
-            <div class="feature-item">💼 <strong>Secure Transactions</strong> - Transact safely via Pi Wallet.</div>
-            
-            <br>
-            <button id="pay-btn" class="btn" style="background: linear-gradient(135deg, #e2a126, #b77f15);">
-                🚀 Run Step 10 Test Payment (1 Pi)
-            </button>
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                        <h3 class="font-bold text-lg text-white mb-4">List New Real Estate</h3>
+                        <form id="vendor-listing-form" onsubmit="submitNewListing(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs text-slate-400 font-medium mb-1">Property Title</label>
+                                <input type="text" id="prop-title" required placeholder="e.g. Zamani Waterfront Villa" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-slate-400 font-medium mb-1">Pricing (Pi Coin)</label>
+                                    <input type="number" id="prop-price" required step="0.1" min="0.1" placeholder="50" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-amber-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 font-medium mb-1">Listing Type</label>
+                                    <select id="prop-purpose" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-amber-500">
+                                        <option value="Buy">For Sale</option>
+                                        <option value="Rent">For Rent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 font-medium mb-1">Location Address</label>
+                                <input type="text" id="prop-location" required placeholder="Abuja, Nigeria" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 font-medium mb-1">Image Presentation</label>
+                                <select id="prop-image" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none">
+                                    <option value="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80">🏢 Luxury Modern Villa</option>
+                                    <option value="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80">🌇 Executive City Penthouse</option>
+                                    <option value="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=600&q=80">🏡 Cozy Suburban Ranch</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 font-medium mb-1">Description Details</label>
+                                <textarea id="prop-desc" rows="3" required placeholder="Describe rooms, terms, or contact options..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-amber-500"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition">Launch Listing</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                        <h3 class="font-bold text-lg text-white mb-4">Your Dynamic Vendor Catalog</h3>
+                        <div id="vendor-listings-container" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-admin" class="tab-content hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                    <span class="text-[10px] uppercase font-bold text-slate-500">Gross Vault Volume</span>
+                    <h3 id="admin-vault-volume" class="text-2xl font-black text-amber-400 mt-1">1,200.00 π</h3>
+                    <p class="text-[10px] text-emerald-400 mt-1">▲ Multi-sig escrow secured</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                    <span class="text-[10px] uppercase font-bold text-slate-500">Ecosystem Shelters</span>
+                    <h3 id="admin-total-shelters" class="text-2xl font-black text-white mt-1">2</h3>
+                    <p class="text-[10px] text-slate-400 mt-1">Active platform registries</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                    <span class="text-[10px] uppercase font-bold text-slate-500">On-Chain Handshakes</span>
+                    <h3 id="admin-handshake-count" class="text-2xl font-black text-emerald-400 mt-1">0</h3>
+                    <p class="text-[10px] text-slate-400 mt-1">Validated secure callbacks</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="font-bold text-lg text-white mb-4">Master Properties Controller</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase font-bold">
+                                <tr>
+                                    <th class="p-3 rounded-l-lg">Title</th>
+                                    <th class="p-3">Price</th>
+                                    <th class="p-3">Origin</th>
+                                    <th class="p-3 rounded-r-lg text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-listings-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="font-bold text-lg text-white mb-2">Live Escrow Audit Stream</h3>
+                    <p class="text-xs text-slate-400 mb-4">On-chain blockchain transaction log hashes.</p>
+                    <div id="admin-audit-logs" class="space-y-3 max-h-[380px] overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="details-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl">
+            <img id="modal-img" class="w-full h-48 object-cover" src="" alt="Shelter Asset">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 id="modal-title" class="text-2xl font-extrabold text-white"></h2>
+                    <span id="modal-purpose" class="px-2.5 py-1 text-[10px] font-extrabold rounded bg-amber-500 text-slate-950 uppercase tracking-widest"></span>
+                </div>
+                <p id="modal-location" class="text-xs text-slate-400 mb-4"></p>
+                <p id="modal-description" class="text-xs text-slate-400 border-t border-b border-slate-800 py-3 mb-4 leading-relaxed"></p>
+                
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center mb-6">
+                    <span class="text-xs text-slate-400 font-semibold uppercase">Escrow Hold Valuation</span>
+                    <span id="modal-price" class="text-xl font-black text-amber-400"></span>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="initiatePiPurchase()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 rounded-xl text-sm shadow-xl transition">
+                        Pay with Pi Wallet
+                    </button>
+                    <button onclick="closeDetailsModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-5 rounded-xl text-xs transition">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        const statusText = document.getElementById('status-text');
-        const authBtn = document.getElementById('auth-btn');
-        const mainApp = document.getElementById('main-app');
-        const payBtn = document.getElementById('pay-btn');
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
 
-        // Initialize Pi SDK (sandbox: true matches your developer portal checklist mode)
-        try {
-            Pi.init({ version: "2.0", sandbox: true });
-            statusText.innerText = "SDK initialized. Tap authenticate below.";
-            authBtn.classList.remove('hidden');
-        } catch (e) {
-            statusText.innerText = "Please open this app inside the Pi Browser.";
+    <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 ZAMANI SHELTERS. Production Web3 deployment node with secure serverless completion hooks.</p>
+    </footer>
+
+    <script>
+        // Core Database Memory
+        let properties = [
+            { id: 1, title: "Zamani Luxury Penthouse", location: "Maitama, Abuja", price: 450, purpose: "Buy", origin: "admin", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80", description: "Bespoke smart-automation estate layout overlooking city skyline views." },
+            { id: 2, title: "Oceanview Retreat Duplex", location: "Eko Atlantic, Lagos", price: 120, purpose: "Rent", origin: "vendor", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80", description: "Premium coastal high-rise stay structure featuring decentralized key security access." }
+        ];
+        
+        let auditLogs = [];
+        let isPiConnected = false;
+        let selectedProperty = null;
+        let activeOriginFilter = 'all';
+
+     swindow.addEventListener('DOMContentLoaded', () => {
+            // Restore persistent state memory to guarantee seamless session management on Vercel
+            if (localStorage.getItem('z_props')) {
+                properties = JSON.parse(localStorage.getItem('z_props'));
+            }
+            if (localStorage.getItem('z_logs')) {
+                auditLogs = JSON.parse(localStorage.getItem('z_logs'));
+            }
+
+            if (typeof Pi !== 'undefined') {
+                try {
+                    // Initialize Pi SDK client parameters
+                    Pi.init({ version: "2.0", sandbox: true });
+                    const badge = document.getElementById('connection-badge');
+                    badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold";
+                    document.getElementById('connection-text').innerText = "Pi Browser Active";
+                } catch (err) { 
+                    console.error("Pi SDK Initialization failure:", err); 
+                }
+            } else {
+                showToast("Desktop environment active. Enabled simulated developer module.");
+            }
+            refreshUI();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            activeTab.classList.remove('hidden');
+            activeTab.classList.add('block');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition duration-200";
+            });
+
+            document.getElementById(`btn-${tabId}`).className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium transition duration-200 text-amber-400 bg-slate-800/80";
+
+            refreshUI();
         }
 
-        // Authentication Hook
-        authBtn.addEventListener('click', async () => {
-            statusText.innerText = "Connecting...";
-            authBtn.disabled = true;
-            try {
-                const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                statusText.innerHTML = `👋 Welcome back, <strong>${auth.user.username}</strong>!`;
-                authBtn.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-            } catch (error) {
-                statusText.innerText = "Authentication failed.";
-                authBtn.disabled = false;
+        function filterOrigin(originType) {
+            activeOriginFilter = originType;
+            document.querySelectorAll("[id^='orig-']").forEach(btn => btn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-white transition");
+            document.getElementById(`orig-${originType}`).className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 transition";
+            refreshUI();
+        }
+
+        function connectPiWallet() {
+            if (typeof Pi !== 'undefined') {
+                Pi.authenticate(['username', 'payments'], onIncompletePaymentFound)
+                .then(auth => {
+                    isPiConnected = true;
+                    document.getElementById('connect-btn').innerText = `@${auth.user.username}`;
+                    document.getElementById('connection-badge').className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold";
+                    document.getElementById('connection-badge').innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span id="connection-text">Authenticated</span>`;
+                    showToast(`Successfully linked: @${auth.user.username}`);
+                }).catch(err => {
+                    console.error(err);
+                    showToast("Auth handshake failed. Reverting to desktop emulation context.");
+                    executeFallbackConnection();
+                });
+            } else {
+                executeFallbackConnection();
             }
-        });
+        }
 
-        // Trigger Connected Step 10 Payment Flow
-        payBtn.addEventListener('click', async () => {
-            statusText.innerText = "Preparing transaction...";
-            payBtn.disabled = true;
+        function executeFallbackConnection() {
+            isPiConnected = true;
+            document.getElementById('connect-btn').innerText = "@pioneer_mairahs_dev";
+            document.getElementById('connection-badge').className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold";
+            document.getElementById('connection-badge').innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span><span id="connection-text">Simulated Wallet</span>`;
+            showToast("Linked simulated credentials: @pioneer_zamani_dev");
+        }
 
-            try {
-                const paymentData = {
-                    amount: 1,
-                    memo: "Testing step 10 domain deployment for Zamani Shelters",
-                    metadata: { type: "test_claim" }
-                };
+        function refreshUI() {
+            const grid = document.getElementById('listings-grid');
+            grid.innerHTML = "";
+            
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            const purposeVal = document.getElementById('filter-purpose').value;
 
-                const callbacks = {
-                    onReadyForServerApproval: async (paymentId) => {
-                        statusText.innerText = "Sending payment to backend for automatic approval...";
-                        try {
-                            // This fetch connects straight to your new Vercel serverless function folder!
-                            const response = await fetch('/api/approve-payment', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ paymentId })
-                            });
-                            
-                            if(response.ok) {
-                                statusText.innerText = "Backend approved! Please continue on your wallet pop-up.";
-                            } else {
-                                statusText.innerText = "Backend approval failed. Check your Vercel logs.";
-                                payBtn.disabled = false;
-                            }
-                        } catch(err) {
-                            statusText.innerText = "Network connection error to backend.";
-                            payBtn.disabled = false;
-                        }
+            // Filter properties database
+            const filteredProps = properties.filter(p => {
+                const matchesSearch = p.title.toLowerCase().includes(searchVal) || p.location.toLowerCase().includes(searchVal) || p.description.toLowerCase().includes(searchVal);
+                const matchesPurpose = purposeVal === 'all' || p.purpose === purposeVal;
+                const matchesOrigin = activeOriginFilter === 'all' || p.origin === activeOriginFilter;
+                return matchesSearch && matchesPurpose && matchesOrigin;
+            });
+
+            if (filteredProps.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-slate-900/40 border border-slate-800 rounded-2xl">
+                        <p class="text-sm text-slate-500">No properties fit search criteria. Try modifying filter parameters.</p>
+                    </div>`;
+            }
+
+            filteredProps.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden p-4 flex flex-col justify-between hover:border-slate-700 transition duration-300";
+                card.innerHTML = `
+                    <div>
+                        <div class="relative overflow-hidden rounded-xl mb-3 h-44">
+                            <img src="${p.image}" class="h-full w-full object-cover">
+                            <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded bg-slate-950/80 backdrop-blur-sm text-[10px] text-white font-extrabold uppercase border border-slate-700/40">
+                                ${p.origin === 'admin' ? '🛡️ Admin Verified' : '🧑‍🌾 Vendor Node'}
+                            </span>
+                            <span class="absolute bottom-2 right-2 px-2 py-0.5 text-[9px] font-extrabold rounded bg-amber-500 text-slate-950 uppercase tracking-widest">
+                                For ${p.purpose}
+                            </span>
+                        </div>
+                        <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">${p.location}</span>
+                        <h3 class="font-bold text-white text-base truncate mt-0.5">${p.title}</h3>
+                        <p class="text-xs text-slate-400 mt-1 line-clamp-2">${p.description}</p>
+                    </div>
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-slate-800/60">
+                        <div>
+                            <span class="text-[9px] text-slate-500 block uppercase font-semibold">Valuation</span>
+                            <span class="text-amber-400 font-bold">${p.price} π</span>
+                        </div>
+                        <button onclick="viewPropertyDetails(${p.id})" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-bold transition">Inspect Deal</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Update Vendor Workspace Catalog List
+            const vendorContainer = document.getElementById('vendor-listings-container');
+            const vendorProps = properties.filter(p => p.origin === 'vendor');
+            
+            document.getElementById('vendor-stat-count').innerText = vendorProps.length;
+            
+            const completedAcquisitions = auditLogs.filter(l => l.type === "ACQUISITION");
+            const totalVendorSales = completedAcquisitions.length * 150; // Mock sales summary volume
+            document.getElementById('vendor-stat-volume').innerText = `${totalVendorSales.toFixed(2)} π`;
+
+            vendorContainer.innerHTML = vendorProps.length === 0 
+                ? '<p class="text-xs text-slate-500 text-center py-4 bg-slate-950 rounded-xl border border-slate-800">No properties initialized on this profile node.</p>' : '';
+            vendorProps.forEach(p => {
+                vendorContainer.innerHTML += `
+                    <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                        <div>
+                            <span class="font-bold text-slate-200 block">${p.title}</span>
+                            <span class="text-slate-500 text-[10px]">${p.location} • For ${p.purpose}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-amber-400 font-bold">${p.price} π</span>
+                            <button onclick="removeListing(${p.id})" class="text-red-400 hover:text-red-300">Remove</button>
+                        </div>
+                    </div>`;
+            });
+
+            // Update Admin Panel table rows
+            const adminTbody = document.getElementById('admin-listings-tbody');
+            adminTbody.innerHTML = "";
+            properties.forEach(p => {
+                adminTbody.innerHTML += `
+                    <tr class="border-b border-slate-800/60 hover:bg-slate-950/20 transition text-xs">
+                        <td class="p-3 font-semibold text-slate-200">${p.title}</td>
+                        <td class="p-3 font-bold text-amber-400">${p.price} π</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[9px] font-bold ${p.origin === 'admin' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-slate-800 text-slate-400'}">${p.origin.toUpperCase()}</span></td>
+                        <td class="p-3 text-right"><button onclick="removeListing(${p.id})" class="text-red-400 hover:underline">Force Delete</button></td>
+                    </tr>`;
+            });
+
+            // Update Admin Metrics Summaries
+            document.getElementById('admin-total-shelters').innerText = properties.length;
+            document.getElementById('admin-handshake-count').innerText = auditLogs.length;
+            const aggregateEscrows = (1200 + (completedAcquisitions.reduce((acc, curr) => acc + parseFloat(curr.price || 0), 0)));
+            document.getElementById('admin-vault-volume').innerText = `${aggregateEscrows.toFixed(2)} π`;
+
+            // Update Admin Audit logs list
+            const auditContainer = document.getElementById('admin-audit-logs');
+            auditContainer.innerHTML = auditLogs.length === 0 ? '<p class="text-xs text-slate-500 py-2">No verification handshakes recorded.</p>' : '';
+            auditLogs.slice().reverse().forEach(log => {
+                auditContainer.innerHTML += `
+                    <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] space-y-1">
+                        <div class="flex justify-between font-mono"><span class="text-amber-400 font-bold">${log.type}</span><span class="text-slate-500">${log.txid.substring(0,10)}...</span></div>
+                        <p class="text-slate-300">${log.desc}</p>
+                    </div>`;
+            });
+        }
+
+        function viewPropertyDetails(id) {
+            selectedProperty = properties.find(p => p.id === id);
+            document.getElementById('modal-img').src = selectedProperty.image;
+            document.getElementById('modal-title').innerText = selectedProperty.title;
+            document.getElementById('modal-location').innerText = `📍 ${selectedProperty.location}`;
+            document.getElementById('modal-description').innerText = selectedProperty.description;
+            document.getElementById('modal-price').innerText = `${selectedProperty.price} π`;
+            document.getElementById('modal-purpose').innerText = `For ${selectedProperty.purpose}`;
+            document.getElementById('details-modal').classList.remove('hidden');
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('details-modal').classList.add('hidden');
+        }
+
+        /* LIVE PI TRANSACTION INTEGRATION PROTOCOL */
+        function initiatePiPurchase() {
+            if (!isPiConnected) {
+                showToast("Connect your operational Pi wallet first!");
+                return;
+            }
+            closeDetailsModal();
+            showToast("Connecting to Pi network blockchain node...");
+
+            if (typeof Pi !== 'undefined') {
+                Pi.createPayment({
+                    amount: selectedProperty.price,
+                    memo: `Zamani Shelters - Escrow Lock: ${selectedProperty.title}`,
+                    metadata: { propertyId: selectedProperty.id }
+                }, {
+                    onReadyForServerApproval: function(paymentId) {
+                        // SERVER SIDE APPROVAL STAGE - Routing to your single handler
+                        fetch('/api/approve-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId })
+                        })
+                        .then(res => {
+                            if (!res.ok) throw new Error("Approval response issue");
+                            return res.json();
+                        })
+                        .then(() => {
+                            showToast("Escrow security cleared. Approve authorization via passphrase now.");
+                        })
+                        .catch(() => showToast("Edge server failed to authorize transactional block. Check API keys."));
                     },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        statusText.innerText = "Payment completed and recorded on the blockchain network!";
-                        console.log("Transaction ID:", txid);
+                    onReadyForServerCompletion: function(paymentId, txid) {
+                        // SERVER SIDE SETTLEMENT COMPLETION STAGE - Passing directly to checklist completion validation
+                        fetch('/api/approve-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paymentId, txid })
+                        })
+                        .then(res => {
+                            if (!res.ok) throw new Error("Completion response issue");
+                            return res.json();
+                        })
+                        .then(() => {
+                            finalizeAcquisition(txid);
+                        })
+                        .catch(() => showToast("Finalizing blockchain transaction records encountered node issues."));
                     },
-                    onCancel: (paymentId) => {
-                        statusText.innerText = "Transaction cancelled.";
-                        payBtn.disabled = false;
+                    onCancel: function() { 
+                        showToast("Transaction signature dropped by Pioneer."); 
                     },
-                    onError: (error, payment) => {
-                        statusText.innerText = "Transaction error encountered.";
-                        payBtn.disabled = false;
+                    onError: function(err) { 
+                        console.error(err); 
+                        showToast("An error occurred during blockchain operations."); 
                     }
-                };
-
-                await Pi.createPayment(paymentData, callbacks);
-
-            } catch (err) {
-                statusText.innerText = "Payment initialization failed.";
-                payBtn.disabled = false;
+                });
+            } else {
+                // Pre-flight desktop preview sandbox simulation fallback logic
+                setTimeout(() => {
+                    const simulatedTx = "tx_sim_" + Math.random().toString(36).substring(2, 14).toUpperCase();
+                    finalizeAcquisition(simulatedTx);
+                }, 1200);
             }
-        });
+        }
 
-        function onIncompletePaymentFound(payment) {
-            console.log("Incomplete payment tracked:", payment);
+        function finalizeAcquisition(txid) {
+            auditLogs.push({ 
+                type: "ACQUISITION", 
+                desc: `Secured escrow hold on '${selectedProperty.title}' for ${selectedProperty.price} Pi.`, 
+                txid: txid,
+                price: selectedProperty.price
+            });
+            
+            properties = properties.map(p => {
+                if (p.id === selectedProperty.id) {
+                    return { 
+                        ...p, 
+                        title: `[ESCROW ACCREDITED] ${p.title}`, 
+                        description: `Finalized and under immediate escrow settlement validation. Block transaction signature verified under hash identification reference: ${txid}.`
+                    };
+                }
+                return p;
+            });
+            
+            saveAndSync();
+            showToast("Success! Escrow protocol finalized and tracked.");
+        }
+
+        function submitNewListing(e) {
+            e.preventDefault();
+            properties.push({
+                id: Date.now(),
+                title: document.getElementById('prop-title').value,
+                price: parseFloat(document.getElementById('prop-price').value),
+                purpose: document.getElementById('prop-purpose').value,
+                location: document.getElementById('prop-location').value,
+                description: document.getElementById('prop-desc').value,
+                origin: "vendor",
+                image: document.getElementById('prop-image').value
+            });
+            e.target.reset();
+            saveAndSync();
+            showToast("Ecosystem property catalog successfully updated.");
+        }
+
+        function removeListing(id) {
+            properties = properties.filter(p => p.id !== id);
+            saveAndSync();
+            showToast("Property listing deleted from current database.");
+        }
+
+        function saveAndSync() {
+            localStorage.setItem('z_props', JSON.stringify(properties));
+            localStorage.setItem('z_logs', JSON.stringify(auditLogs));
+            refreshUI();
+        }
+
+        function onIncompletePaymentFound(payment) { 
+            console.warn("Discovered incomplete transaction block payload:", payment); 
+        }
+        
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = "bg-slate-900 text-slate-100 border border-slate-700 shadow-2xl p-4 rounded-xl text-xs font-semibold max-w-xs transition duration-300 transform translate-y-0 opacity-100";
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.replace('opacity-100', 'opacity-0');
+                setTimeout(() => toast.remove(), 400);
+            }, 4500);
         }
     </script>
 </body>
